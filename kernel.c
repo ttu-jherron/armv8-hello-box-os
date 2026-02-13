@@ -1,3 +1,6 @@
+// Author: John Herron
+// Date:   February 12, 2026
+
 #include "libos.h"
 
 int box(unsigned int srow, unsigned int scol, unsigned int erow, unsigned int ecol);

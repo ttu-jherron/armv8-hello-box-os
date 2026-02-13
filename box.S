@@ -1,3 +1,6 @@
+// Author: John Herron
+// Date:   February 12, 2026
+
 .global box
 .global _box_check_box_
 .global _box_draw_corners_
@@ -13,10 +16,10 @@ box:
 
     // Save the arguments. Called functions may overwrite x0-x3
     sub     sp, sp, 32
-    stp     x0, x1, [sp]
-    stp     x2, x3, [sp, 16]
+    stp     x0, x1, [sp]        // [sp+0] = srow, scol
+    stp     x2, x3, [sp, 16]    // [sp+16] = erow, ecol
 
-    // sr in w0, sc in w1, er int w2, ec in w3
+    // sr in w0, sc in w1, er in w2, ec in w3
 
     // Make sure the argument are valid
 
@@ -44,22 +47,23 @@ box:
 
     // You figure out what goes here
 
-    // draw left and right slides
+    // draw left and right slides '|'
     ldp     x0, x1, [sp]
     ldp     x2, x3, [sp, 16]
     bl      _box_draw_right_left_
 
     // you figure out what goes here
 
+    // success 
     mov     w0, 0
     b       _box_exit_
 
 _box_error_:
+    // Invalid
     mov     w0, 1
 
 _box_exit_:
     add     sp, sp, 32  // pop save arg regs 
-
     ldp     x29, x30, [sp], 16
     ret
 
@@ -111,10 +115,24 @@ _box_check_box_:
     mov     w0, 0
     b       _check_done
 
+_check_invalid:
+    mov w0, 1
+
+_check_done:
+    // restore callee-saved regs 
+    ldp     x21, x22, [sp], 16
+    ldp     x19, x20, [sp], 16
+
+    // Epilogue
+    ldp     x29, x30, [sp], 16
+    ret
+
+
+// uses (srow, scol) (srow, ecol) (erow, scol) (erow, ecol)
 _box_draw_corners_:
     
     stp     x29, x30, [sp, -16]!
-    mov x29, sp
+    mov     x29, sp
 
     // Save callee-saved regs
     stp     x19, x20, [sp, -16]!
@@ -267,31 +285,5 @@ _sides_done:
     ret
 
 
-_check_invalid:
-    mov w0, 1
-
-_check_done:
-    // restore callee-saved regs 
-    ldp     x21, x22, [sp], 16
-    ldp     x19, x20, [sp], 16
-
-    // Epilogue
-    ldp     x29, x30, [sp], 16
-    ret
-
-
-
-
-
-
-
-
-
-    // return 0 (success)
-    mov     w0, 0
-
-    // standard exit
-    ldp     x29, x30, [sp], 16
-    ret
 
 
